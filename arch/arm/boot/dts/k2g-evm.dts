@@ -74,6 +74,15 @@
 			0x1d8 (MUX_MODE0)	/* uart0_rtsn */
 		>;
 	};
+
+	spi1_pins: pinmux_spi1_pins {
+		pinctrl-single,pins = <
+			0x1a4 (MUX_MODE0)	/* spi1_scs0 */
+			0x1ac (MUX_MODE0)	/* spi1_clk */
+			0x1b0 (MUX_MODE0)	/* spi1_miso */
+			0x1b4 (MUX_MODE0)	/* spi1_mosi */
+		>;
+	};
 };
 
 &i2c0 {
@@ -118,4 +127,29 @@
 &uart0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart0_pins>;
+};
+
+&spi1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi1_pins>;
+
+	nor_flash: n25q128a13@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "Micron,n25q128a13";
+		spi-max-frequency = <5000000>;
+		m25p,fast-read;
+		reg = <0>;
+
+		partition@0 {
+			label = "u-boot-spl";
+			reg = <0x0 0x80000>;
+			read-only;
+		};
+
+		partition@1 {
+			label = "misc";
+			reg = <0x80000 0xf80000>;
+		};
+	};
 };

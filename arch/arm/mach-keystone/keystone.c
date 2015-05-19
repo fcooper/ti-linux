@@ -15,6 +15,7 @@
 #include <linux/of_platform.h>
 #include <linux/of_address.h>
 #include <linux/memblock.h>
+#include <linux/signal.h>
 
 #include <asm/setup.h>
 #include <asm/mach/map.h>
@@ -29,6 +30,24 @@
 
 static struct notifier_block platform_nb;
 static unsigned long keystone_dma_pfn_offset __read_mostly;
+
+static bool ignore_first = true;
+static int keystone_async_ext_abort_fault(unsigned long addr, unsigned int fsr,
+                                         struct pt_regs *regs)
+{
+	/*
+	 * if first time, ignore this as this seems to be a spurious one
+	 * happening on some devices and we add this work around to handle
+	 * this first time when kernel switch to handle user space
+	 */
+	if (ignore_first) {
+		ignore_first = false;
+		return 0;
+	}
+
+	/* Subsequent ones should be handled as fault */
+	return 1;
+}
 
 static int keystone_platform_notifier(struct notifier_block *nb,
 				      unsigned long event, void *data)
@@ -55,6 +74,13 @@ static void __init keystone_init(void)
 	if (platform_nb.notifier_call)
 		bus_register_notifier(&platform_bus_type, &platform_nb);
 	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
+
+	/*
+	 * Add a one time exception handler to catch asynchronous external
+	 * abort when transitioning to use space
+	 */
+	hook_fault_code(17, keystone_async_ext_abort_fault, SIGBUS, 0,
+			"async external abort handler");
 }
 
 static phys_addr_t keystone_virt_to_idmap(unsigned long x)

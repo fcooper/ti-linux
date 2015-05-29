@@ -190,6 +190,30 @@
 			#dma-cells = <1>;
 		};
 
+		mmc0: mmc@23000000 {
+			compatible = "ti,omap4-hsmmc";
+			reg = <0x23000000 0x400>;
+			interrupts = <GIC_SPI 96 IRQ_TYPE_EDGE_RISING>;
+			dmas = <&edma 24>, <&edma 25>;
+			dma-names = "tx", "rx";
+			bus-width = <4>;
+			clocks = <&mmcclkadpi>;
+			clock-names = "fck";
+			ti,dual-volt;
+		};
+
+		mmc1: mmc@23100000 {
+			compatible = "ti,omap4-hsmmc";
+			reg = <0x23100000 0x400>;
+			interrupts = <GIC_SPI 97 IRQ_TYPE_EDGE_RISING>;
+			dmas = <&edma 26>, <&edma 27>;
+			dma-names = "tx", "rx";
+			bus-width = <8>;
+			clocks = <&mmcclkadpi>;
+			clock-names = "fck";
+			ti,dual-volt;
+		};
+
 		spi0: spi@21805400 {
 			compatible = "ti,dm6441-spi";
 			reg = <0x21805400 0x200>;

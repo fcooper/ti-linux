@@ -163,6 +163,15 @@ clocks {
 		clock-output-names = "uart12";
 	};
 
+	mmcclkadpi: mmcclkadpi {
+		#clock-cells = <0>;
+		compatible = "fixed-factor-clock";
+		clocks = <&uartpllclk>;
+		clock-div = <4>;
+		clock-mult = <1>;
+		clock-output-names = "clkadpi";
+	};
+
 	clkalwaysonsys: clkalwaysonsys {
 		#clock-cells = <0>;
 		compatible = "ti,keystone,psc-clock";

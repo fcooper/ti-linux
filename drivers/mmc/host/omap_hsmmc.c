@@ -1567,10 +1567,13 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	if (ios->power_mode != host->power_mode) {
 		switch (ios->power_mode) {
 		case MMC_POWER_OFF:
-			mmc_pdata(host)->set_power(host->dev, 0, 0);
+			if (host->use_reg)
+				mmc_pdata(host)->set_power(host->dev, 0, 0);
 			break;
 		case MMC_POWER_UP:
-			mmc_pdata(host)->set_power(host->dev, 1, ios->vdd);
+			if (host->use_reg)
+				mmc_pdata(host)->set_power(host->dev, 1,
+							   ios->vdd);
 			break;
 		case MMC_POWER_ON:
 			do_send_init_stream = 1;
@@ -2102,9 +2105,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
 		if (ret)
 			goto err_irq;
 		host->use_reg = 1;
+		mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
+	} else {
+		mmc->ocr_avail = MMC_VDD_32_33;
 	}
-
-	mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
 
 	omap_hsmmc_disable_irq(host);
 

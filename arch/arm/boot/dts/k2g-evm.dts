@@ -1,0 +1,121 @@
+/*
+ * Copyright 2014 Texas Instruments, Inc.
+ *
+ * Keystone 2 Galileo EVM device tree
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+/dts-v1/;
+
+#include "k2g.dtsi"
+
+/ {
+	compatible =  "ti,k2g-evm","ti,keystone";
+	model = "Texas Instruments Keystone 2 Galileo EVM";
+
+	aliases {
+		serial0	= &uart0;
+/*		gpio0   = &gpio0; */
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <0x00000008 0x00000000 0x00000000 0x80000000>;
+	};
+
+	soc {
+		clocks {
+			refclksys: refclksys {
+				#clock-cells = <0>;
+				compatible = "fixed-clock";
+				clock-frequency = <24000000>;
+				clock-output-names = "refclk-sys";
+			};
+
+			refclkddr3a: refclkddr3a {
+				#clock-cells = <0>;
+				compatible = "fixed-clock";
+				clock-frequency = <24000000>;
+				clock-output-names = "refclk-ddr3a";
+			};
+		};
+	};
+
+};
+
+&k2g_pinctrl {
+
+	i2c0_pins: pinmux_i2c0_pins {
+		pinctrl-single,pins = <
+			0x37c	(MUX_MODE0)	/* i2c0_scl */
+			0x380	(MUX_MODE0)	/* i2c0_sda */
+		>;
+	};
+
+	mmc0_pins: pinmux_mmc0_pins {
+		pinctrl-single,pins = <
+			0x300	(MUX_MODE2)	/* mmc0_dat3 */
+			0x304	(MUX_MODE2)	/* mmc0_dat2 */
+			0x308	(MUX_MODE2)	/* mmc0_dat1 */
+			0x30c	(MUX_MODE2)	/* mmc0_dat0 */
+			0x310	(MUX_MODE2)	/* mmc0_clk */
+			0x314	(MUX_MODE2)	/* mmc0_cmd */
+			0x2ec	(MUX_MODE2)	/* mmc0_sdcd */
+		>;
+	};
+
+	uart0_pins: pinmux_uart0_pins {
+		pinctrl-single,pins = <
+			0x1cc (MUX_MODE0)	/* uart0_rxd */
+			0x1d0 (MUX_MODE0)	/* uart0_txd */
+			0x1d4 (MUX_MODE0)	/* uart0_ctsn */
+			0x1d8 (MUX_MODE0)	/* uart0_rtsn */
+		>;
+	};
+};
+
+&i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c0_pins>;
+
+	dtt@50 {
+		compatible = "at,24c1024";
+		reg = <0x50>;
+	};
+};
+
+&usb0_phy {
+	status = "okay";
+};
+
+&keystone_usb0 {
+	status = "okay";
+};
+
+&usb0 {
+	dr_mode = "host";
+};
+
+&usb1_phy {
+	status = "okay";
+};
+
+&keystone_usb1 {
+	status = "okay";
+};
+
+&usb1 {
+	dr_mode = "peripheral";	/* should be otg/dual-role */
+};
+
+&mmc0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mmc0_pins>;
+};
+
+&uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart0_pins>;
+};

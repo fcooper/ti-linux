@@ -1,0 +1,344 @@
+/*
+ * Copyright 2014 Texas Instruments, Inc.
+ *
+ * Keystone 2 Galileo soc device tree
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/pinctrl-keystone.h>
+#include "skeleton.dtsi"
+
+/ {
+	model = "Texas Instruments Keystone 2 SoC";
+	#address-cells = <2>;
+	#size-cells = <2>;
+	interrupt-parent = <&gic>;
+
+	aliases {
+		serial0	= &uart0;
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		interrupt-parent = <&gic>;
+
+		cpu@0 {
+			compatible = "arm,cortex-a15";
+			device_type = "cpu";
+			reg = <0>;
+		};
+	};
+
+	gic: interrupt-controller {
+		compatible = "arm,cortex-a15-gic";
+		#interrupt-cells = <3>;
+		interrupt-controller;
+		reg = <0x0 0x02561000 0x0 0x1000>,
+		      <0x0 0x02562000 0x0 0x2000>,
+		      <0x0 0x02564000 0x0 0x1000>,
+		      <0x0 0x02566000 0x0 0x2000>;
+		interrupts = <GIC_PPI 9 (GIC_CPU_MASK_SIMPLE(4) |
+				IRQ_TYPE_LEVEL_HIGH)>;
+	};
+
+	timer {
+		compatible = "arm,armv7-timer";
+		interrupts =
+			<GIC_PPI 13
+				(GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
+			<GIC_PPI 14
+				(GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
+			<GIC_PPI 11
+				(GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
+			<GIC_PPI 10
+				(GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>;
+	};
+
+	pmu {
+		compatible = "arm,cortex-a15-pmu";
+		interrupts = <GIC_SPI 4 IRQ_TYPE_EDGE_RISING>;
+	};
+
+	soc {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "ti,keystone","simple-bus";
+		interrupt-parent = <&gic>;
+		ranges = <0x0 0x0 0x0 0xc0000000>;
+		dma-ranges = <0x80000000 0x8 0x00000000 0x80000000>;
+
+		pllctrl: pll-controller@02310000 {
+			compatible = "ti,keystone-pllctrl", "syscon";
+			reg = <0x02310000 0x200>;
+		};
+
+		devctrl: device-state-control@02620000 {
+			compatible = "ti,keystone-devctrl", "syscon";
+			reg = <0x02620000 0x1000>;
+		};
+
+		rstctrl: reset-controller {
+			compatible = "ti,keystone-reset";
+			ti,syscon-pll = <&pllctrl 0xe4>;
+			ti,syscon-dev = <&devctrl 0x328>;
+			ti,wdt-list = <0>;
+		};
+
+		k2g_pinctrl: pinmux@02621000 {
+			compatible = "pinctrl-single";
+			reg = <0x02621000 0x410>;
+			pinctrl-single,register-width = <32>;
+			pinctrl-single,function-mask = <0x00070007>;
+		};
+
+		/include/ "k2g-clocks.dtsi"
+
+		uart0: serial@02530c00 {
+			compatible = "ns16550a";
+			current-speed = <115200>;
+			reg-shift = <2>;
+			reg-io-width = <4>;
+			reg = <0x02530c00 0x100>;
+			/* this is on shared LPSC #6 that is turned ON by
+			 * default in u-boot. So use fixed clock.
+			 */
+			clocks	= <&uartclk12>;
+			clock-names = "uart";
+			interrupts = <GIC_SPI 164 IRQ_TYPE_EDGE_RISING>;
+		};
+
+		uart1:	serial@02531000 {
+			compatible = "ns16550a";
+			current-speed = <115200>;
+			reg-shift = <2>;
+			reg-io-width = <4>;
+			reg = <0x02531000 0x100>;
+			/* this is on shared LPSC #6 that is turned ON by
+			 * default in u-boot. So use fixed clock.
+			 */
+			clocks	= <&uartclk12>;
+			clock-names = "uart";
+			interrupts = <GIC_SPI 165 IRQ_TYPE_EDGE_RISING>;
+		};
+
+		uart2:	serial@02531400 {
+			compatible = "ns16550a";
+			current-speed = <115200>;
+			reg-shift = <2>;
+			reg-io-width = <4>;
+			reg = <0x02531400 0x100>;
+			/* this is on shared LPSC #6 that is turned ON by
+			 * default in u-boot. So use fixed clock.
+			 */
+			clocks	= <&uartclk12>;
+			clock-names = "uart";
+			interrupts = <GIC_SPI 166 IRQ_TYPE_EDGE_RISING>;
+		};
+
+		i2c0: i2c@2530000 {
+			compatible = "ti,davinci-i2c";
+			reg = <0x02530000 0x400>;
+			clock-frequency = <100000>;
+			clocks = <&clkalwaysonsys>;
+			clock-names = "i2c";
+			interrupts = <GIC_SPI 88 IRQ_TYPE_EDGE_RISING>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		i2c1: i2c@2530400 {
+			compatible = "ti,davinci-i2c";
+			reg = <0x02530400 0x400>;
+			clock-frequency = <100000>;
+			/* this is on shared LPSC #6 that is turned ON by
+			 * default in u-boot. So use fixed clock.
+			 */
+			clocks = <&chipclk16>;
+			clock-names = "i2c";
+			interrupts = <GIC_SPI 89 IRQ_TYPE_EDGE_RISING>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		i2c2: i2c@2530800 {
+			compatible = "ti,davinci-i2c";
+			reg = <0x02530800 0x400>;
+			clock-frequency = <100000>;
+			/* this is on shared LPSC #6 that is turned ON by
+			 * default in u-boot. So use fixed clock.
+			 */
+			clocks = <&chipclk16>;
+			clock-names = "i2c";
+			interrupts = <GIC_SPI 90 IRQ_TYPE_EDGE_RISING>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		edma: edma@02728000 {
+			compatible = "ti,edma3";
+			reg =	<0x02728000 0x10000>;
+			interrupts = <GIC_SPI 221 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 219 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 220 IRQ_TYPE_EDGE_RISING>;
+			#dma-cells = <1>;
+		};
+
+		spi0: spi@21805400 {
+			compatible = "ti,dm6441-spi";
+			reg = <0x21805400 0x200>;
+			num-cs = <4>;
+			ti,davinci-spi-intr-line = <0>;
+			interrupts = <GIC_SPI 64 IRQ_TYPE_EDGE_RISING>;
+			/* this is on shared LPSC #6 that is turned ON by
+			 * default in u-boot. So use fixed clock.
+			 */
+			clocks = <&chipclk16>;
+			clock-names = "spi";
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		spi1: spi@21805800 {
+			compatible = "ti,dm6441-spi";
+			reg = <0x21805800 0x200>;
+			num-cs = <4>;
+			ti,davinci-spi-intr-line = <0>;
+			interrupts = <GIC_SPI 66 IRQ_TYPE_EDGE_RISING>;
+			/* this is on shared LPSC #6 that is turned ON by
+			 * default in u-boot. So use fixed clock.
+			 */
+			clocks = <&chipclk16>;
+			clock-names = "spi";
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		spi2: spi@21805c00 {
+			compatible = "ti,dm6441-spi";
+			reg = <0x21805C00 0x200>;
+			num-cs = <4>;
+			ti,davinci-spi-intr-line = <0>;
+			interrupts = <GIC_SPI 68 IRQ_TYPE_EDGE_RISING>;
+			/* this is on shared LPSC #6 that is turned ON by
+			 * default in u-boot. So use fixed clock.
+			 */
+			clocks = <&chipclk16>;
+			clock-names = "spi";
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		spi3: spi@21806000 {
+			compatible = "ti,dm6441-spi";
+			reg = <0x21806000 0x200>;
+			num-cs = <4>;
+			ti,davinci-spi-intr-line = <0>;
+			interrupts = <GIC_SPI 70 IRQ_TYPE_EDGE_RISING>;
+			/* this is on shared LPSC #6 that is turned ON by
+			 * default in u-boot. So use fixed clock.
+			 */
+			clocks = <&chipclk16>;
+			clock-names = "spi";
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		usb0_phy: usb-phy@0 {
+			compatible = "usb-nop-xceiv";
+			status = "disabled";
+		};
+
+		keystone_usb0: keystone-dwc3@2680000 {
+			compatible = "ti,keystone-dwc3";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			reg = <0x2680000 0x10000>;
+			clocks = <&clkusb0sys>;
+			clock-names = "usb";
+			interrupts = <GIC_SPI 128 IRQ_TYPE_EDGE_RISING>;
+			ranges;
+			dma-coherent;
+			dma-ranges;
+			status = "disabled";
+
+			usb0: usb@2690000 {
+				compatible = "synopsys,dwc3";
+				reg = <0x2690000 0x10000>;
+				interrupts = <GIC_SPI 128 IRQ_TYPE_EDGE_RISING>;
+				maximum-speed = "high-speed";
+				dr_mode = "otg";
+				usb-phy = <&usb0_phy>;
+			};
+		};
+
+		usb1_phy: usb-phy@1 {
+			compatible = "usb-nop-xceiv";
+			status = "disabled";
+		};
+
+		keystone_usb1: keystone-dwc3@2580000 {
+			compatible = "ti,keystone-dwc3";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			reg = <0x2580000 0x10000>;
+			clocks = <&clkusb1sys>;
+			clock-names = "usb";
+			interrupts = <GIC_SPI 144 IRQ_TYPE_EDGE_RISING>;
+			ranges;
+			dma-coherent;
+			dma-ranges;
+			status = "disabled";
+
+			usb1: usb@2690000 {
+				compatible = "synopsys,dwc3";
+				reg = <0x2590000 0x10000>;
+				interrupts = <GIC_SPI 144 IRQ_TYPE_EDGE_RISING>;
+				maximum-speed = "high-speed";
+				dr_mode = "otg";
+				usb-phy = <&usb1_phy>;
+			};
+		};
+
+		wdt: wdt@02260000 {
+			compatible = "ti,keystone-wdt","ti,davinci-wdt";
+			reg = <0x02260000 0x80>;
+			clocks = <&clkalwaysonsys>;
+		};
+
+		/* Timer 5 */
+		clock_event: timer@2250000 {
+			compatible = "ti,keystone-timer";
+			reg = <0x02250000 0x80>;
+			interrupts = <GIC_SPI 26 IRQ_TYPE_EDGE_RISING>;
+			/* this is on shared LPSC #6 that is turned ON by
+			 * default in u-boot. So use fixed clock.
+			 */
+			clocks = <&chipclk16>;
+		};
+
+		dcan0: can@0260B200 {
+			compatible = "ti,am4372-d_can", "ti,am3352-d_can";
+			clocks = <&chipclk16>;
+			clock-names = "fck";
+			reg = <0x0260B200 0x200>;
+			interrupts = <GIC_SPI 190 IRQ_TYPE_EDGE_RISING>;
+		};
+
+		dcan1: can@0260B400 {
+			compatible = "ti,am4372-d_can", "ti,am3352-d_can";
+			clocks = <&chipclk16>;
+			clock-names = "fck";
+			reg = <0x0260B400 0x200>;
+			interrupts = <GIC_SPI 193 IRQ_TYPE_EDGE_RISING>;
+		};
+
+	}; /* soc */
+};
+

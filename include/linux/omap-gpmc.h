@@ -11,9 +11,6 @@
 
 #define GPMC_CONFIG_WP		0x00000005
 
-#define GPMC_IRQ_FIFOEVENTENABLE	0x01
-#define GPMC_IRQ_COUNT_EVENT		0x02
-
 enum gpmc_nand_irq {
 	GPMC_NAND_IRQ_FIFOEVENT = 0,
 	GPMC_NAND_IRQ_TERMCOUNT,
@@ -60,7 +57,7 @@ extern int gpmc_calc_timings(struct gpmc_timings *gpmc_t,
 
 struct device_node;
 
-extern int gpmc_get_client_irq(unsigned irq_config);
+extern int gpmc_get_irq(void);
 
 extern unsigned int gpmc_ticks_to_ns(unsigned int ticks);
 

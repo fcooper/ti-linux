@@ -386,6 +386,7 @@
 		 * SW5.9 (GPMC_WPN) = OFF (HIGH)
 		 */
 		reg = <0 0 4>;		/* device IO registers */
+		interrupt-parent = <&crossbar_mpu>;
 		ti,nand-ecc-opt = "bch8";
 		ti,elm-id = <&elm>;
 		nand-bus-width = <16>;

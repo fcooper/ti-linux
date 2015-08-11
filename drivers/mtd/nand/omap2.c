@@ -499,15 +499,15 @@ static inline int omap_nand_dma_transfer(struct mtd_info *mtd, void *addr,
 	tx->callback_param = &info->comp;
 	dmaengine_submit(tx);
 
+	init_completion(&info->comp);
+	dma_async_issue_pending(info->dma);
+
 	/*  configure and start prefetch transfer */
 	ret = omap_prefetch_enable(info->gpmc_cs,
 		PREFETCH_FIFOTHRESHOLD_MAX, 0x1, len, is_write, info);
 	if (ret)
 		/* PFPW engine is busy, use cpu copy method */
 		goto out_copy_unmap;
-
-	init_completion(&info->comp);
-	dma_async_issue_pending(info->dma);
 
 	/* setup and start DMA using dma_addr */
 	wait_for_completion(&info->comp);

@@ -472,20 +472,39 @@ static inline int omap_nand_dma_transfer(struct mtd_info *mtd, void *addr,
 	unsigned n;
 	int ret;
 	u32 val;
+	void *kaddr = 0;
 
-	if (addr >= high_memory) {
+	if (addr >= high_memory  ) {
 		struct page *p1;
 
 		if (((size_t)addr & PAGE_MASK) !=
 			((size_t)(addr + len - 1) & PAGE_MASK))
 			goto out_copy;
+
 		p1 = vmalloc_to_page(addr);
 		if (!p1)
 			goto out_copy;
-		addr = page_address(p1) + ((size_t)addr & ~PAGE_MASK);
+
+		if(!PageHighMem(p1)) {
+			addr = page_address(p1) + ((size_t)addr & ~PAGE_MASK);
+		}
+		else {
+			kaddr = kmalloc(len,GFP_KERNEL);
+
+			if(!kaddr)
+				goto out_copy;
+
+			if(is_write)
+				memcpy(kaddr,addr,len);
+
+		}
 	}
 
-	sg_init_one(&sg, addr, len);
+	if (kaddr)
+		sg_init_one(&sg, kaddr, len);
+	else
+		sg_init_one(&sg, addr, len);
+
 	n = dma_map_sg(info->dma->device->dev, &sg, 1, dir);
 	if (n == 0) {
 		dev_err(&info->pdev->dev,
@@ -528,6 +547,14 @@ static inline int omap_nand_dma_transfer(struct mtd_info *mtd, void *addr,
 	omap_prefetch_reset(info->gpmc_cs, info);
 
 	dma_unmap_sg(info->dma->device->dev, &sg, 1, dir);
+
+	if (kaddr) {
+		if(!is_write)
+			memcpy(addr,kaddr,len);
+
+		kfree(kaddr);
+	}
+
 	return 0;
 
 out_copy_unmap:
@@ -539,6 +566,10 @@ out_copy:
 	else
 		is_write == 0 ? omap_read_buf8(mtd, (u_char *) addr, len)
 			: omap_write_buf8(mtd, (u_char *) addr, len);
+
+	if (kaddr)
+		kfree(kaddr);
+
 	return 0;
 }
 

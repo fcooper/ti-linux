@@ -465,7 +465,7 @@ static struct omap_hwmod dra7xx_tptc0_hwmod = {
 	.class		= &dra7xx_tptc_hwmod_class,
 	.clkdm_name	= "l3main1_clkdm",
 	.flags		= HWMOD_SWSUP_SIDLE | HWMOD_SWSUP_MSTANDBY |
-			  HWMOD_NEEDS_REIDLE,
+			  (1 << 14),
 	.main_clk	= "l3_iclk_div",
 	.prcm		= {
 		.omap4	= {
@@ -482,7 +482,7 @@ static struct omap_hwmod dra7xx_tptc1_hwmod = {
 	.class		= &dra7xx_tptc_hwmod_class,
 	.clkdm_name	= "l3main1_clkdm",
 	.flags		= HWMOD_SWSUP_SIDLE | HWMOD_SWSUP_MSTANDBY |
-			  HWMOD_NEEDS_REIDLE,
+			  (1 << 14),
 	.main_clk	= "l3_iclk_div",
 	.prcm		= {
 		.omap4	= {

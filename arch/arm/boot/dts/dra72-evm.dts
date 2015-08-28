@@ -270,6 +270,35 @@
 			0x2c8 (PIN_INPUT_PULLUP | WAKEUP_EN | MUX_MODE14 ) /* mcasp1_axr5.gpio5_7 - WLAN_IRQ */
 		>;
 	};
+
+
+	nand_default: nand_default {
+		pinctrl-single,pins = <
+			0x0	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad0 */
+			0x4	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad1 */
+			0x8	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad2 */
+			0xc	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad3 */
+			0x10	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad4 */
+			0x14	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad5 */
+			0x18	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad6 */
+			0x1c	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad7 */
+			0x20	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad8 */
+			0x24	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad9 */
+			0x28	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad10 */
+			0x2c	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad11 */
+			0x30	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad12 */
+			0x34	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad13 */
+			0x38	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad14 */
+			0x3c	(PIN_INPUT  | MUX_MODE0) /* gpmc_ad15 */
+			0xb4	(PIN_OUTPUT | MUX_MODE0) /* gpmc_cs0 */
+			0xc4	(PIN_OUTPUT | MUX_MODE0) /* gpmc_advn_ale */
+			0xcc	(PIN_OUTPUT | MUX_MODE0) /* gpmc_wen */
+			0xc8	(PIN_OUTPUT | MUX_MODE0) /* gpmc_oen_ren */
+			0xd0	(PIN_OUTPUT | MUX_MODE0) /* gpmc_ben0 */
+			0xd8	(PIN_INPUT  | MUX_MODE0) /* gpmc_wait0 */
+		>;
+	};
+
 };
 
 &i2c1 {
@@ -514,6 +543,9 @@
 &uart3 {
 	status = "okay";
 	gpios = <&pcf_gpio_21 14 GPIO_ACTIVE_LOW>;
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&nand_default>;
 };
 
 &elm {
@@ -528,6 +560,8 @@
 		 * SW5.1 (NAND_SELn) = ON (LOW)
 		 * SW5.9 (GPMC_WPN) = OFF (HIGH)
 		 */
+
+		ti,nand-xfer-type = "prefetch-dma";
 		compatible = "ti,omap2-nand";
 		reg = <0 0 4>;		/* device IO registers */
 		interrupt-parent = <&crossbar_mpu>;
@@ -700,7 +734,7 @@
 };
 
 &qspi {
-	status = "okay";
+	status = "disabled";
 
 	spi-max-frequency = <48000000>;
 	m25p80@0 {

@@ -1362,6 +1362,8 @@
 		};
 
 		gpmc: gpmc@50000000 {
+			dmas = <&sdma 4>;
+			dma-names = "rxtx";
 			compatible = "ti,am3352-gpmc";
 			ti,hwmods = "gpmc";
 			reg = <0x50000000 0x37c>;      /* device IO registers */

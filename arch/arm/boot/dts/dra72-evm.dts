@@ -375,6 +375,9 @@
 
 &uart1 {
 	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&nand_default>;
+
 };
 
 &elm {
@@ -391,8 +394,11 @@
 		 * SW5.1 (NAND_SELn) = ON (LOW)
 		 * SW5.9 (GPMC_WPN) = OFF (HIGH)
 		 */
+		ti,nand-xfer-type = "prefetch-dma";
+		compatible = "ti,omap2-nand";
 		reg = <0 0 4>;		/* device IO registers */
 		interrupt-parent = <&crossbar_mpu>;
+		interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
 		ready-gpio = <&gpmc 0 GPIO_ACTIVE_HIGH>; /* gpmc_wait0 pin */
 		ti,nand-ecc-opt = "bch8";
 		ti,elm-id = <&elm>;
